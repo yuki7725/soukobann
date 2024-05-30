@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour
         string debugText = "";
         for(int i=0;i<map.Length;i++)
         {
-            debugText += map[i].ToString()+",";
+            debugText += map[i].ToString() + ",";
         }
         Debug.Log(debugText);
     }
@@ -33,18 +33,23 @@ public class GameManager : MonoBehaviour
             //動けない条件を先に置き、リターンする、早期リターン
             return false;
         }
-        if (map[moveTo] == 2)
-        { 
         //どの方向へ移動するか
-        int velocity = moveTo - moveFrom;
-        //プレイヤーの移動先から2個分移動させる
+            int velocity = moveTo - moveFrom;
+            //プレイヤーの移動先から2個分移動させる
+           // new Vector3(moveTo, -1 * moveTo, 0);
+
         bool success = MoveNumber(2, moveTo, moveTo + velocity);
         //移動が失敗したらプレイヤーも移動しない
-            if (!success ) 
-            {
-                return false;
-            } 
+        if (!success ) 
+        {
+            return false;
         }
+
+        if (map[moveTo] == 2)
+        {
+            int offset =moveTo - moveFrom;
+        }
+
         map[moveTo] = number;
         map[moveFrom] = 0;
         return true;
@@ -79,6 +84,10 @@ public class GameManager : MonoBehaviour
 
             if (playerIndex < map.Length - 1)
             {
+                if (map[playerIndex + 1] == 2)
+                {
+                    map[playerIndex + 2] = 2;
+                }
                 map[playerIndex + 1] = 1;
                 map[playerIndex] = 0;
             }
@@ -97,6 +106,10 @@ public class GameManager : MonoBehaviour
 
             if (playerIndex < map.Length - 1)
             {
+                if (map[playerIndex - 1] == 2)
+                {
+                    map[playerIndex - 2] = 2;
+                }
                 map[playerIndex - 1] = 1;
                 map[playerIndex] = 0;
             }
