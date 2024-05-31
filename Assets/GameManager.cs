@@ -140,6 +140,7 @@ public class GameManagerScript : MonoBehaviour
 {
     //追加
     public GameObject playerPrefab;
+    public GameObject boxPrefab;
     int[,] map;//レベルデザイン用の配列
     GameObject[,] field;//ゲーム管理用の配列
 
@@ -148,13 +149,15 @@ public class GameManagerScript : MonoBehaviour
         //二次元配列に対応
         if (moveTo.y < 0 || moveTo.y >= field.GetLength(0)) { return false; };
         if (moveTo.x < 0 || moveTo.x >= field.GetLength(2)) { return false; };
-        ////箱のプレハブをまだ作っていないので動かす処理はコメントアウト
-        //if (map[moveTo] == 2) 
-        //{
-        //    int velocity = moveTo - moveFrom;
-        //    bool success = MoveNumber(2, moveTo, moveTo + velocity);
-        //    if (!success) {return false; }
-        //}
+        
+        //箱のプレハブをまだ作っていないので動かす処理はコメントアウト
+        if (field[moveTo.y,moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Box")
+        {
+            Vector2Int velocity = moveTo + moveFrom;
+            bool success = MoveNumber(moveTo, moveTo + velocity);
+            if (!success) { return false; };
+        }
+
         field[moveFrom.y, moveFrom.x].transform.position = new Vector3(moveTo.x, map.GetLength(0) - moveTo.y, 0);
         field[moveTo.y, moveTo.x] = field[moveFrom.y, moveFrom.x];
         field[moveFrom.y,moveFrom.x] = null;
@@ -188,8 +191,8 @@ public class GameManagerScript : MonoBehaviour
        // GameObject instance = Instantiate( playerPrefab,new Vector3(0, 0, 0), Quaternion.identity);
 
         map = new int[,] {
-            { 1, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0 },
+            { 0, 1, 0, 2, 0 },
             { 0, 0, 0, 0, 0 },
         };
         string debugText = "";
@@ -205,12 +208,19 @@ public class GameManagerScript : MonoBehaviour
         {
             for (int x = 0; x < map.GetLength(1); x++)
             {
+                //[y,x]=1なら playerを実体化
                 if (map[y, x] == 1)
                 {
                     //GameObject instance=Instantiate(playerPrefab,new Vector3(x,map.GetLength(0)-y,0),Quaternion.identity);
                     field[y, x] = Instantiate(playerPrefab, new Vector3(x, map.GetLength(0) - y, 0), Quaternion.identity);
                 }
                 debugText += map[y, x].ToString() + ",";
+
+                //[y.x]=2なら　boxを実体化
+                if (map[y,x] == 2)
+                {
+                    field[y, x] = Instantiate(boxPrefab, new Vector3(x, map.GetLength(0) - y, 0), Quaternion.identity);
+                }
             }
             debugText += "\n";//改行
         }
@@ -226,10 +236,35 @@ public class GameManagerScript : MonoBehaviour
             MoveNumber(
                 playerIndex,
                 playerIndex + new Vector2Int(1, 0));
+
+            //メソッド化した処理を使用
+            //int playerIndex = GetPlayerIndex();
+
+            //移動処理、boxを押す処理を書きたい
+            if (playerIndex < map.Length - 1)
+            {
+                if (map[playerIndex + 1] == 2)
+                {
+                    map[playerIndex + 2] = 2;
+                }
+                map[playerIndex + 1] = 1;
+                map[playerIndex] = 0;
+            }
+
+            ////移動処理を関数化
+            //MoveNumber(1, playerIndex, playerIndex + 1);
         }
 
         //左移動
-       
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            //メソッド化した処理を使用
+            Vector2Int playerIndex = GetPlayerIndex();
+            MoveNumber(
+                playerIndex,
+                playerIndex + new Vector2Int(-1, 0));
+        }
+
     }
 }
 
