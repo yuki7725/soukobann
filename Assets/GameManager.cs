@@ -148,10 +148,10 @@ public class GameManagerScript : MonoBehaviour
     {
         //二次元配列に対応
         if (moveTo.y < 0 || moveTo.y >= field.GetLength(0)) { return false; };
-        if (moveTo.x < 0 || moveTo.x >= field.GetLength(2)) { return false; };
-        
+        if (moveTo.x < 0 || moveTo.x >= field.GetLength(1)) { return false; };
+
         //箱のプレハブをまだ作っていないので動かす処理はコメントアウト
-        if (field[moveTo.y,moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Box")
+        if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Box")
         {
             Vector2Int velocity = moveTo + moveFrom;
             bool success = MoveNumber(moveTo, moveTo + velocity);
@@ -159,6 +159,8 @@ public class GameManagerScript : MonoBehaviour
         }
 
         field[moveFrom.y, moveFrom.x].transform.position = new Vector3(moveTo.x, map.GetLength(0) - moveTo.y, 0);
+        //GameObject player0rBox = field[moveTo.y,moveTo.x];
+
         field[moveTo.y, moveTo.x] = field[moveFrom.y, moveFrom.x];
         field[moveFrom.y,moveFrom.x] = null;
 
@@ -178,7 +180,8 @@ public class GameManagerScript : MonoBehaviour
                 //nullだったら continueしているのでタグの確認
                 if (field[y,x].tag=="Player")
                 {
-                    return new Vector2Int(x, y);
+                    //プレイヤーの位置を[x,y]に代入
+                    return new Vector2Int(y, x);
                 }
             }
         }
@@ -191,11 +194,11 @@ public class GameManagerScript : MonoBehaviour
        // GameObject instance = Instantiate( playerPrefab,new Vector3(0, 0, 0), Quaternion.identity);
 
         map = new int[,] {
-            { 0, 0, 0, 0, 0 },
-            { 0, 1, 0, 2, 0 },
+            { 1, 0, 0, 0, 0 },
+            { 0, 0, 0, 2, 0 },
             { 0, 0, 0, 0, 0 },
         };
-        string debugText = "";
+        //string debugText = "";
 
         field = new GameObject
             [
@@ -214,7 +217,7 @@ public class GameManagerScript : MonoBehaviour
                     //GameObject instance=Instantiate(playerPrefab,new Vector3(x,map.GetLength(0)-y,0),Quaternion.identity);
                     field[y, x] = Instantiate(playerPrefab, new Vector3(x, map.GetLength(0) - y, 0), Quaternion.identity);
                 }
-                debugText += map[y, x].ToString() + ",";
+                //debugText += map[y, x].ToString() + ",";
 
                 //[y.x]=2なら　boxを実体化
                 if (map[y,x] == 2)
@@ -222,49 +225,69 @@ public class GameManagerScript : MonoBehaviour
                     field[y, x] = Instantiate(boxPrefab, new Vector3(x, map.GetLength(0) - y, 0), Quaternion.identity);
                 }
             }
-            debugText += "\n";//改行
+            //debugText += "\n";//改行
         }
-        Debug.Log(debugText);
+       // Debug.Log(debugText);
     }
     void Update()
     {
         //右移動
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            //メソッド化した処理を使用
+            //現在の位置を playerIndexに渡す
             Vector2Int playerIndex = GetPlayerIndex();
+            //位置を移動させる
             MoveNumber(
-                playerIndex,
-                playerIndex + new Vector2Int(1, 0));
-
-            //メソッド化した処理を使用
-            //int playerIndex = GetPlayerIndex();
-
-            //移動処理、boxを押す処理を書きたい
-            if (playerIndex < map.Length - 1)
-            {
-                if (map[playerIndex + 1] == 2)
-                {
-                    map[playerIndex + 2] = 2;
-                }
-                map[playerIndex + 1] = 1;
-                map[playerIndex] = 0;
-            }
-
-            ////移動処理を関数化
-            //MoveNumber(1, playerIndex, playerIndex + 1);
+                playerIndex,//moveFrom
+                playerIndex + new Vector2Int(1, 0));//moveTo
         }
 
         //左移動
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            //メソッド化した処理を使用
+            //現在の位置を playerIndexに渡す
             Vector2Int playerIndex = GetPlayerIndex();
+            //位置を移動させる
             MoveNumber(
-                playerIndex,
-                playerIndex + new Vector2Int(-1, 0));
+                playerIndex,//moveFrom
+                playerIndex + new Vector2Int(-1, 0));//moveTo
+        }
+
+        //上移動
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            //現在の位置を playerIndexに渡す
+            Vector2Int playerIndex = GetPlayerIndex();
+            //位置を移動させる
+            MoveNumber(
+                playerIndex,//moveFrom
+                playerIndex + new Vector2Int(0, -1));//moveTo
+        }
+
+        //下移動
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            //現在の位置を playerIndexに渡す
+            Vector2Int playerIndex = GetPlayerIndex();
+            //位置を移動させる
+            MoveNumber(
+                playerIndex,//moveFrom
+                playerIndex + new Vector2Int(0, 1));//moveTo
         }
 
     }
+
+    //void PrintArray()
+    //{
+    //    string debugText = "";
+    //    for (int i = 0; i < map.Length; i++)
+    //        for (int j = 0; j < map.Length; j++)
+    //        {
+    //            {
+    //                debugText += map[j,i].ToString() + ",";
+    //            }
+    //        } debugText += "\n";
+    //    Debug.Log(debugText);
+    //}
 }
 
